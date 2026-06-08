@@ -38,28 +38,25 @@ async function onMessageSendHandler(event: Office.AddinCommands.Event) {
     const warnings = results.filter((r) => r.level === "warning");
 
     if (errors.length > 0) {
-      // 完全ブロック(allowEvent: false)
+      // 完全ブロック(allowEvent: false で送信不可)
       const msg = errors.map((e) => `🚫 ${e.title}: ${e.detail}`).join("\n");
       event.completed({
         allowEvent: false,
         errorMessage: msg,
-        cancelLabel: "修正する",
       } as any);
       return;
     }
 
     if (warnings.length > 0) {
-      // 警告: ユーザーに確認させる(PromptUser モードなので OK/キャンセルが出る)
-      const msg = warnings.map((w) => `⚠ ${w.title}: ${w.detail}`).join("\n");
+      // 警告: 一旦ブロック → ダイアログを閉じてもう一度送信すれば送れる
+      // (PromptUser モードでは再 send 時にハンドラが再実行される)
+      const msg = "⚠ 確認してください\n\n"
+        + warnings.map((w) => `・${w.title}: ${w.detail}`).join("\n")
+        + "\n\n問題なければダイアログを閉じてもう一度送信ボタンを押してください。";
       event.completed({
         allowEvent: false,
-        errorMessage: msg + "\n\nそれでも送信しますか?",
-        cancelLabel: "送信する",
-        commandId: "msgComposeSettingsButton",
-        contextData: JSON.stringify({ kind: "warning", count: warnings.length }),
+        errorMessage: msg,
       } as any);
-      // 注: PromptUser モードでは cancelLabel ボタンを押した時の挙動は実装依存。
-      //     UX の磨き込みは v2 で行う。
       return;
     }
 
