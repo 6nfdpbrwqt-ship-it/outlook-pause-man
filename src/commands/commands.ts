@@ -3,6 +3,9 @@
 import { loadSettings, Settings } from "../shared/settings";
 import { runChecks, CheckResult } from "../shared/checkEngine";
 
+// デプロイ確認用タグ(ビルドごとに変える)
+const BUILD_TAG = "v1.0.3-fast-2026-06-08-20:30";
+
 Office.onReady(() => {
   // Office.js ready
 });
@@ -29,20 +32,20 @@ async function gatherMailData(item: Office.MessageCompose) {
  */
 async function onMessageSendHandler(event: Office.AddinCommands.Event) {
   // デバッグ用: ハンドラの実行ステップを蓄積してダイアログに出す
-  const trace: string[] = [];
+  const trace: string[] = [BUILD_TAG];
   const t0 = Date.now();
   const log = (msg: string) => trace.push(`+${Date.now() - t0}ms ${msg}`);
 
   log("handler entered");
 
-  // 安全タイムアウト: 3.5 秒(Outlook の「予想以上に時間が...」警告が出る前に強制完了)
+  // 安全タイムアウト: 3 秒(Outlook の「予想以上に時間が...」警告が出る前に強制完了)
   const safety = setTimeout(() => {
-    log("SAFETY TIMEOUT (3.5s)");
+    log("SAFETY TIMEOUT (3s)");
     event.completed({
       allowEvent: false,
-      errorMessage: "OutlookPauseMan: タイムアウト\n\n" + trace.join("\n"),
+      errorMessage: trace.join("\n"),
     } as any);
-  }, 3500);
+  }, 3000);
   const done = (opts: any) => {
     clearTimeout(safety);
     event.completed(opts);
