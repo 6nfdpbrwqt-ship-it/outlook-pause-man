@@ -35,14 +35,14 @@ async function onMessageSendHandler(event: Office.AddinCommands.Event) {
 
   log("handler entered");
 
-  // 安全タイムアウト: 6 秒以内に event.completed を呼べなかったら強制送信許可
+  // 安全タイムアウト: 3.5 秒(Outlook の「予想以上に時間が...」警告が出る前に強制完了)
   const safety = setTimeout(() => {
-    log("SAFETY TIMEOUT (6s)");
+    log("SAFETY TIMEOUT (3.5s)");
     event.completed({
       allowEvent: false,
       errorMessage: "OutlookPauseMan: タイムアウト\n\n" + trace.join("\n"),
     } as any);
-  }, 6000);
+  }, 3500);
   const done = (opts: any) => {
     clearTimeout(safety);
     event.completed(opts);
