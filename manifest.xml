@@ -69,12 +69,16 @@
                 </Group>
               </OfficeTab>
             </ExtensionPoint>
+            <!-- LaunchEvent (OnMessageSend) を一時的に除外して、admin center 検証の切り分け -->
+            <!--
             <ExtensionPoint xsi:type="LaunchEvent">
               <LaunchEvents>
                 <LaunchEvent Type="OnMessageSend" FunctionName="onMessageSendHandler" SendMode="PromptUser"/>
               </LaunchEvents>
               <SourceLocation resid="Commands.Url"/>
             </ExtensionPoint>
+            -->
+
           </DesktopFormFactor>
         </Host>
       </Hosts>
