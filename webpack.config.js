@@ -73,6 +73,17 @@ module.exports = async (env, options) => {
               }
             },
           },
+          {
+            from: "manifest.json",
+            to: "manifest.json",
+            transform(content) {
+              if (dev) {
+                return content;
+              } else {
+                return content.toString().replace(new RegExp(urlDev, "g"), urlProd);
+              }
+            },
+          },
         ],
       }),
       new HtmlWebpackPlugin({

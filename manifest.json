@@ -1,0 +1,99 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/teams/v1.19/MicrosoftTeams.schema.json",
+  "manifestVersion": "1.19",
+  "id": "6599e1cb-e9c7-45e5-b7dc-e04ea2bc9bc9",
+  "version": "1.0.0",
+  "name": {
+    "short": "OutlookPauseMan",
+    "full": "OutlookPauseMan (アウトルック ポーズマン)"
+  },
+  "description": {
+    "short": "Outlook 誤送信防止アドイン",
+    "full": "新しい Outlook 用の誤送信防止アドイン。送信前に宛先・件名・本文・外部ドメイン・禁止ワードをチェックします。"
+  },
+  "developer": {
+    "name": "TATSURO HIGUCHI",
+    "websiteUrl": "https://github.com/6nfdpbrwqt-ship-it/outlook-pause-man",
+    "privacyUrl": "https://github.com/6nfdpbrwqt-ship-it/outlook-pause-man",
+    "termsOfUseUrl": "https://github.com/6nfdpbrwqt-ship-it/outlook-pause-man"
+  },
+  "icons": {
+    "outline": "assets/icon-32.png",
+    "color": "assets/icon-128.png"
+  },
+  "accentColor": "#4f7cff",
+  "localizationInfo": {
+    "defaultLanguageTag": "ja-jp"
+  },
+  "authorization": {
+    "permissions": {
+      "resourceSpecific": [
+        {
+          "name": "MailboxItem.ReadWrite.User",
+          "type": "Delegated"
+        }
+      ]
+    }
+  },
+  "validDomains": [
+    "6nfdpbrwqt-ship-it.github.io"
+  ],
+  "extensions": [
+    {
+      "requirements": {
+        "scopes": ["mail"],
+        "capabilities": [
+          { "name": "Mailbox", "minVersion": "1.12" }
+        ]
+      },
+      "runtimes": [
+        {
+          "id": "PauseManRuntime",
+          "type": "general",
+          "code": {
+            "page": "https://localhost:3000/commands.html"
+          },
+          "lifetime": "short",
+          "actions": [
+            {
+              "id": "onMessageSendHandler",
+              "type": "executeFunction"
+            }
+          ]
+        }
+      ],
+      "autoRunEvents": [
+        {
+          "requirements": {
+            "capabilities": [
+              { "name": "Mailbox", "minVersion": "1.12" }
+            ]
+          },
+          "events": [
+            {
+              "type": "messageSending",
+              "actionId": "onMessageSendHandler",
+              "options": {
+                "sendMode": "promptUser"
+              }
+            }
+          ]
+        }
+      ],
+      "alternates": [
+        {
+          "alternateIcons": {
+            "icon": {
+              "size": 64,
+              "url": "https://localhost:3000/assets/icon-64.png"
+            },
+            "highResolutionIcon": {
+              "size": 80,
+              "url": "https://localhost:3000/assets/icon-80.png"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
