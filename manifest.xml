@@ -4,7 +4,7 @@
            xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0"
            xmlns:mailappor="http://schemas.microsoft.com/office/mailappversionoverrides/1.0"
            xsi:type="MailApp">
-  <Id>621b7f70-2e0f-4347-87b6-a1cfc66e7806</Id>
+  <Id>6599e1cb-e9c7-45e5-b7dc-e04ea2bc9bc9</Id>
   <Version>1.0.0.0</Version>
   <ProviderName>TATSURO HIGUCHI</ProviderName>
   <DefaultLocale>ja-JP</DefaultLocale>
@@ -12,7 +12,10 @@
   <Description DefaultValue="Outlook 誤送信防止アドイン (アウトルック ポーズマン)"/>
   <IconUrl DefaultValue="https://6nfdpbrwqt-ship-it.github.io/outlook-pause-man/assets/icon-64.png"/>
   <HighResolutionIconUrl DefaultValue="https://6nfdpbrwqt-ship-it.github.io/outlook-pause-man/assets/icon-128.png"/>
-  <SupportUrl DefaultValue="https://6nfdpbrwqt-ship-it.github.io/outlook-pause-man/"/>
+  <SupportUrl DefaultValue="https://github.com/6nfdpbrwqt-ship-it/outlook-pause-man"/>
+  <AppDomains>
+    <AppDomain>https://6nfdpbrwqt-ship-it.github.io</AppDomain>
+  </AppDomains>
   <Hosts>
     <Host Name="Mailbox"/>
   </Hosts>
