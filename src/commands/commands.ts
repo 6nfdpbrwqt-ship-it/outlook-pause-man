@@ -1,98 +1,22 @@
 /* global Office */
 
-import { loadSettings, Settings } from "../shared/settings";
-import { runChecks, CheckResult } from "../shared/checkEngine";
+// ============================================================
+// v1.0.4 トライアル: 完全に何もしない極小ハンドラ
+// 即座に errorMessage を返すだけ。遅延ゼロのはず。
+// これでも「予想以上に時間がかかっています」が出る場合は
+// Office.actions.associate の登録が成立していない=ハンドラ自体が呼ばれていない。
+// ============================================================
 
-// デプロイ確認用タグ(ビルドごとに変える)
-const BUILD_TAG = "v1.0.3-fast-2026-06-08-20:30";
+const BUILD_TAG = "v1.0.4-MINIMAL-2026-06-08-20:45";
 
-Office.onReady(() => {
-  // Office.js ready
-});
+Office.onReady(() => {});
 
-async function gatherMailData(item: Office.MessageCompose) {
-  const get = <T>(fn: (cb: (r: Office.AsyncResult<T>) => void) => void) =>
-    new Promise<T>((resolve) => fn((r) => resolve(r.value)));
-
-  const [subject, body, to, cc, bcc] = await Promise.all([
-    get<string>((cb) => item.subject.getAsync(cb)),
-    get<string>((cb) => item.body.getAsync(Office.CoercionType.Text, cb)),
-    get<Office.EmailAddressDetails[]>((cb) => item.to.getAsync(cb)),
-    get<Office.EmailAddressDetails[]>((cb) => item.cc.getAsync(cb)),
-    get<Office.EmailAddressDetails[]>((cb) => item.bcc.getAsync(cb)),
-  ]);
-
-  return { subject: subject || "", body: body || "", to: to || [], cc: cc || [], bcc: bcc || [] };
+function onMessageSendHandler(event: Office.AddinCommands.Event) {
+  const t = Date.now();
+  event.completed({
+    allowEvent: false,
+    errorMessage: `${BUILD_TAG}\n\nhandler ran at: ${new Date(t).toISOString()}\n\nこのメッセージが出たら新ハンドラ動作OK。`,
+  } as any);
 }
 
-/**
- * OnMessageSend ハンドラ。
- * SendMode="PromptUser" なので、allowEvent: false + errorMessage を返すと
- * Outlook 側で「キャンセル / 続行」ダイアログが出る。
- */
-async function onMessageSendHandler(event: Office.AddinCommands.Event) {
-  // デバッグ用: ハンドラの実行ステップを蓄積してダイアログに出す
-  const trace: string[] = [BUILD_TAG];
-  const t0 = Date.now();
-  const log = (msg: string) => trace.push(`+${Date.now() - t0}ms ${msg}`);
-
-  log("handler entered");
-
-  // 安全タイムアウト: 3 秒(Outlook の「予想以上に時間が...」警告が出る前に強制完了)
-  const safety = setTimeout(() => {
-    log("SAFETY TIMEOUT (3s)");
-    event.completed({
-      allowEvent: false,
-      errorMessage: trace.join("\n"),
-    } as any);
-  }, 3000);
-  const done = (opts: any) => {
-    clearTimeout(safety);
-    event.completed(opts);
-  };
-
-  try {
-    const item = Office.context.mailbox.item as unknown as Office.MessageCompose;
-    log("got item");
-    const settings: Settings = loadSettings();
-    log(`loaded settings (domains:${settings.internalDomains.length} words:${settings.forbiddenWords.length})`);
-    log("calling gatherMailData...");
-    const data = await gatherMailData(item);
-    log(`gathered (subj:${data.subject.length}c body:${data.body.length}c to:${data.to.length} cc:${data.cc.length} bcc:${data.bcc.length})`);
-    const results: CheckResult[] = runChecks(data, settings);
-    log(`ran checks, ${results.length} results`);
-
-    const errors = results.filter((r) => r.level === "error");
-    const warnings = results.filter((r) => r.level === "warning");
-
-    if (errors.length > 0) {
-      log("blocking (errors)");
-      const msg = errors.map((e) => `🚫 ${e.title}: ${e.detail}`).join("\n")
-        + "\n\n---debug---\n" + trace.join("\n");
-      done({ allowEvent: false, errorMessage: msg });
-      return;
-    }
-
-    if (warnings.length > 0) {
-      log("warning");
-      const msg = "⚠ 確認してください\n\n"
-        + warnings.map((w) => `・${w.title}: ${w.detail}`).join("\n")
-        + "\n\n問題なければダイアログを閉じてもう一度送信ボタンを押してください。"
-        + "\n\n---debug---\n" + trace.join("\n");
-      done({ allowEvent: false, errorMessage: msg });
-      return;
-    }
-
-    log("all ok, allowing");
-    done({ allowEvent: true });
-  } catch (e: any) {
-    log(`EXCEPTION: ${e?.message || e}`);
-    done({
-      allowEvent: false,
-      errorMessage: "OutlookPauseMan エラー\n\n" + trace.join("\n"),
-    });
-  }
-}
-
-// Office に関数を登録(manifest の FunctionName と一致させる)
 Office.actions.associate("onMessageSendHandler", onMessageSendHandler);
