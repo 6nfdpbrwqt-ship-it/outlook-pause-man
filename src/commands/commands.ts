@@ -28,12 +28,21 @@ async function gatherMailData(item: Office.MessageCompose) {
  * Outlook 側で「キャンセル / 続行」ダイアログが出る。
  */
 async function onMessageSendHandler(event: Office.AddinCommands.Event) {
-  console.log("[OutlookPauseMan] onMessageSendHandler started");
-  // 安全タイムアウト: 7 秒以内に event.completed を呼べなかったら強制送信許可
+  // デバッグ用: ハンドラの実行ステップを蓄積してダイアログに出す
+  const trace: string[] = [];
+  const t0 = Date.now();
+  const log = (msg: string) => trace.push(`+${Date.now() - t0}ms ${msg}`);
+
+  log("handler entered");
+
+  // 安全タイムアウト: 6 秒以内に event.completed を呼べなかったら強制送信許可
   const safety = setTimeout(() => {
-    console.warn("[OutlookPauseMan] safety timeout fired, allowing send");
-    event.completed({ allowEvent: true });
-  }, 7000);
+    log("SAFETY TIMEOUT (6s)");
+    event.completed({
+      allowEvent: false,
+      errorMessage: "OutlookPauseMan: タイムアウト\n\n" + trace.join("\n"),
+    } as any);
+  }, 6000);
   const done = (opts: any) => {
     clearTimeout(safety);
     event.completed(opts);
@@ -41,45 +50,44 @@ async function onMessageSendHandler(event: Office.AddinCommands.Event) {
 
   try {
     const item = Office.context.mailbox.item as unknown as Office.MessageCompose;
+    log("got item");
     const settings: Settings = loadSettings();
-    console.log("[OutlookPauseMan] gathering mail data...");
+    log(`loaded settings (domains:${settings.internalDomains.length} words:${settings.forbiddenWords.length})`);
+    log("calling gatherMailData...");
     const data = await gatherMailData(item);
-    console.log("[OutlookPauseMan] gathered:", { subject: data.subject, bodyLen: data.body.length, to: data.to.length, cc: data.cc.length, bcc: data.bcc.length });
+    log(`gathered (subj:${data.subject.length}c body:${data.body.length}c to:${data.to.length} cc:${data.cc.length} bcc:${data.bcc.length})`);
     const results: CheckResult[] = runChecks(data, settings);
-    console.log("[OutlookPauseMan] results:", results);
+    log(`ran checks, ${results.length} results`);
 
     const errors = results.filter((r) => r.level === "error");
     const warnings = results.filter((r) => r.level === "warning");
 
     if (errors.length > 0) {
-      // 完全ブロック(allowEvent: false で送信不可)
-      const msg = errors.map((e) => `🚫 ${e.title}: ${e.detail}`).join("\n");
-      done({
-        allowEvent: false,
-        errorMessage: msg,
-      });
+      log("blocking (errors)");
+      const msg = errors.map((e) => `🚫 ${e.title}: ${e.detail}`).join("\n")
+        + "\n\n---debug---\n" + trace.join("\n");
+      done({ allowEvent: false, errorMessage: msg });
       return;
     }
 
     if (warnings.length > 0) {
-      // 警告: 一旦ブロック → ダイアログを閉じてもう一度送信すれば送れる
-      // (PromptUser モードでは再 send 時にハンドラが再実行される)
+      log("warning");
       const msg = "⚠ 確認してください\n\n"
         + warnings.map((w) => `・${w.title}: ${w.detail}`).join("\n")
-        + "\n\n問題なければダイアログを閉じてもう一度送信ボタンを押してください。";
-      done({
-        allowEvent: false,
-        errorMessage: msg,
-      });
+        + "\n\n問題なければダイアログを閉じてもう一度送信ボタンを押してください。"
+        + "\n\n---debug---\n" + trace.join("\n");
+      done({ allowEvent: false, errorMessage: msg });
       return;
     }
 
-    // すべて OK
-    console.log("[OutlookPauseMan] all checks passed, allowing send");
+    log("all ok, allowing");
     done({ allowEvent: true });
-  } catch (e) {
-    console.error("[OutlookPauseMan] onMessageSend failed:", e);
-    done({ allowEvent: true });
+  } catch (e: any) {
+    log(`EXCEPTION: ${e?.message || e}`);
+    done({
+      allowEvent: false,
+      errorMessage: "OutlookPauseMan エラー\n\n" + trace.join("\n"),
+    });
   }
 }
 
