@@ -1,2 +1,2 @@
-Office.onReady(()=>{}),Office.actions.associate("onMessageSendHandler",function(e){const n=Date.now();e.completed({allowEvent:!1,errorMessage:`v1.0.4-MINIMAL-2026-06-08-20:45\n\nhandler ran at: ${new Date(n).toISOString()}\n\nこのメッセージが出たら新ハンドラ動作OK。`})});
+(()=>{function e(e){e.completed({allowEvent:!1,errorMessage:`v1.0.5-onReady-2026-06-08\n\nhandler ran at ${(new Date).toISOString()}\n\nこれが見えれば新版が動いてる。`})}Office.onReady(()=>{Office?.actions?.associate&&Office.actions.associate("onMessageSendHandler",e)});try{globalThis.Office?.actions?.associate&&globalThis.Office.actions.associate("onMessageSendHandler",e)}catch{}})();
 //# sourceMappingURL=commands.js.map
