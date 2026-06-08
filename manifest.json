@@ -36,8 +36,7 @@
     }
   },
   "validDomains": [
-    "https://localhost:3000",
-    "https://6nfdpbrwqt-ship-it.github.io"
+    "6nfdpbrwqt-ship-it.github.io"
   ],
   "extensions": [
     {
