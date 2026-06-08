@@ -28,11 +28,25 @@ async function gatherMailData(item: Office.MessageCompose) {
  * Outlook 側で「キャンセル / 続行」ダイアログが出る。
  */
 async function onMessageSendHandler(event: Office.AddinCommands.Event) {
+  console.log("[OutlookPauseMan] onMessageSendHandler started");
+  // 安全タイムアウト: 7 秒以内に event.completed を呼べなかったら強制送信許可
+  const safety = setTimeout(() => {
+    console.warn("[OutlookPauseMan] safety timeout fired, allowing send");
+    event.completed({ allowEvent: true });
+  }, 7000);
+  const done = (opts: any) => {
+    clearTimeout(safety);
+    event.completed(opts);
+  };
+
   try {
     const item = Office.context.mailbox.item as unknown as Office.MessageCompose;
     const settings: Settings = loadSettings();
+    console.log("[OutlookPauseMan] gathering mail data...");
     const data = await gatherMailData(item);
+    console.log("[OutlookPauseMan] gathered:", { subject: data.subject, bodyLen: data.body.length, to: data.to.length, cc: data.cc.length, bcc: data.bcc.length });
     const results: CheckResult[] = runChecks(data, settings);
+    console.log("[OutlookPauseMan] results:", results);
 
     const errors = results.filter((r) => r.level === "error");
     const warnings = results.filter((r) => r.level === "warning");
@@ -40,10 +54,10 @@ async function onMessageSendHandler(event: Office.AddinCommands.Event) {
     if (errors.length > 0) {
       // 完全ブロック(allowEvent: false で送信不可)
       const msg = errors.map((e) => `🚫 ${e.title}: ${e.detail}`).join("\n");
-      event.completed({
+      done({
         allowEvent: false,
         errorMessage: msg,
-      } as any);
+      });
       return;
     }
 
@@ -53,19 +67,19 @@ async function onMessageSendHandler(event: Office.AddinCommands.Event) {
       const msg = "⚠ 確認してください\n\n"
         + warnings.map((w) => `・${w.title}: ${w.detail}`).join("\n")
         + "\n\n問題なければダイアログを閉じてもう一度送信ボタンを押してください。";
-      event.completed({
+      done({
         allowEvent: false,
         errorMessage: msg,
-      } as any);
+      });
       return;
     }
 
     // すべて OK
-    event.completed({ allowEvent: true });
+    console.log("[OutlookPauseMan] all checks passed, allowing send");
+    done({ allowEvent: true });
   } catch (e) {
-    // 失敗時は送信を許可してしまう(誤って送信ブロックを残さないため)
-    console.error("OutlookPauseMan onMessageSend failed:", e);
-    event.completed({ allowEvent: true });
+    console.error("[OutlookPauseMan] onMessageSend failed:", e);
+    done({ allowEvent: true });
   }
 }
 
