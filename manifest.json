@@ -2,14 +2,14 @@
   "$schema": "https://developer.microsoft.com/json-schemas/teams/v1.17/MicrosoftTeams.schema.json",
   "manifestVersion": "1.17",
   "id": "6599e1cb-e9c7-45e5-b7dc-e04ea2bc9bc9",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "name": {
     "short": "OutlookPauseMan",
     "full": "OutlookPauseMan (アウトルック ポーズマン)"
   },
   "description": {
-    "short": "Outlook 誤送信防止アドイン",
-    "full": "新しい Outlook 用の誤送信防止アドイン。送信前に宛先・件名・本文・外部ドメイン・禁止ワードをチェックします。"
+    "short": "Outlook 送信前チェック",
+    "full": "新しい Outlook 用の誤送信防止ツール。送信前に「送信前チェック」ボタンで宛先・件名・本文・外部ドメイン・禁止ワードを確認できます。"
   },
   "developer": {
     "name": "TATSURO HIGUCHI",
@@ -43,18 +43,13 @@
       "requirements": {
         "scopes": ["mail"],
         "capabilities": [
-          { "name": "Mailbox", "minVersion": "1.15" }
+          { "name": "Mailbox", "minVersion": "1.5" }
         ]
       },
       "runtimes": [
         {
           "id": "TaskPaneRuntime",
           "type": "general",
-          "requirements": {
-            "capabilities": [
-              { "name": "Mailbox", "minVersion": "1.15" }
-            ]
-          },
           "code": {
             "page": "https://6nfdpbrwqt-ship-it.github.io/outlook-pause-man/taskpane.html"
           },
@@ -64,26 +59,6 @@
               "id": "ShowTaskPane",
               "type": "openPage",
               "view": "homepage"
-            }
-          ]
-        },
-        {
-          "id": "PauseManRuntime",
-          "type": "general",
-          "requirements": {
-            "capabilities": [
-              { "name": "Mailbox", "minVersion": "1.15" }
-            ]
-          },
-          "code": {
-            "page": "https://6nfdpbrwqt-ship-it.github.io/outlook-pause-man/commands.html",
-            "script": "https://6nfdpbrwqt-ship-it.github.io/outlook-pause-man/commands.js"
-          },
-          "lifetime": "short",
-          "actions": [
-            {
-              "id": "onMessageSendHandler",
-              "type": "executeFunction"
             }
           ]
         }
@@ -107,40 +82,21 @@
                     {
                       "id": "msgComposeOpenPaneButton",
                       "type": "button",
-                      "label": "設定",
+                      "label": "送信前チェック",
                       "icons": [
                         { "size": 16, "url": "https://6nfdpbrwqt-ship-it.github.io/outlook-pause-man/assets/icon-16.png" },
                         { "size": 32, "url": "https://6nfdpbrwqt-ship-it.github.io/outlook-pause-man/assets/icon-32.png" },
                         { "size": 80, "url": "https://6nfdpbrwqt-ship-it.github.io/outlook-pause-man/assets/icon-80.png" }
                       ],
                       "supertip": {
-                        "title": "設定",
-                        "description": "OutlookPauseMan の設定を開きます"
+                        "title": "送信前チェック",
+                        "description": "宛先・件名・本文・外部ドメイン・禁止ワードを送信前にチェックします"
                       },
                       "actionId": "ShowTaskPane"
                     }
                   ]
                 }
               ]
-            }
-          ]
-        }
-      ],
-      "autoRunEvents": [
-        {
-          "requirements": {
-            "scopes": ["mail"],
-            "capabilities": [
-              { "name": "Mailbox", "minVersion": "1.15" }
-            ]
-          },
-          "events": [
-            {
-              "type": "messageSending",
-              "actionId": "onMessageSendHandler",
-              "options": {
-                "sendMode": "promptUser"
-              }
             }
           ]
         }
