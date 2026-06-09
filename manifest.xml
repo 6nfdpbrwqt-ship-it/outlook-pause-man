@@ -4,8 +4,8 @@
            xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0"
            xmlns:mailappor="http://schemas.microsoft.com/office/mailappversionoverrides/1.0"
            xsi:type="MailApp">
-  <Id>6599e1cb-e9c7-45e5-b7dc-e04ea2bc9bc9</Id>
-  <Version>1.0.0.0</Version>
+  <Id>d05f9625-7140-442d-a523-a2b9f3594222</Id>
+  <Version>1.0.0.1</Version>
   <ProviderName>TATSURO HIGUCHI</ProviderName>
   <DefaultLocale>ja-JP</DefaultLocale>
   <DisplayName DefaultValue="OutlookPauseMan"/>
