@@ -2,7 +2,7 @@
   "$schema": "https://developer.microsoft.com/json-schemas/teams/v1.17/MicrosoftTeams.schema.json",
   "manifestVersion": "1.17",
   "id": "6599e1cb-e9c7-45e5-b7dc-e04ea2bc9bc9",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "name": {
     "short": "OutlookPauseMan",
     "full": "OutlookPauseMan (アウトルック ポーズマン)"
@@ -51,9 +51,10 @@
           "id": "PauseManRuntime",
           "type": "general",
           "code": {
-            "page": "https://6nfdpbrwqt-ship-it.github.io/outlook-pause-man/commands.html"
+            "page": "https://6nfdpbrwqt-ship-it.github.io/outlook-pause-man/commands.html",
+            "script": "https://6nfdpbrwqt-ship-it.github.io/outlook-pause-man/commands.js"
           },
-          "lifetime": "long",
+          "lifetime": "short",
           "actions": [
             {
               "id": "onMessageSendHandler",
