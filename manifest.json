@@ -2,7 +2,7 @@
   "$schema": "https://developer.microsoft.com/json-schemas/teams/v1.17/MicrosoftTeams.schema.json",
   "manifestVersion": "1.17",
   "id": "6599e1cb-e9c7-45e5-b7dc-e04ea2bc9bc9",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "name": {
     "short": "OutlookPauseMan",
     "full": "OutlookPauseMan (アウトルック ポーズマン)"
@@ -43,13 +43,18 @@
       "requirements": {
         "scopes": ["mail"],
         "capabilities": [
-          { "name": "Mailbox", "minVersion": "1.12" }
+          { "name": "Mailbox", "minVersion": "1.15" }
         ]
       },
       "runtimes": [
         {
           "id": "PauseManRuntime",
           "type": "general",
+          "requirements": {
+            "capabilities": [
+              { "name": "Mailbox", "minVersion": "1.15" }
+            ]
+          },
           "code": {
             "page": "https://6nfdpbrwqt-ship-it.github.io/outlook-pause-man/commands.html",
             "script": "https://6nfdpbrwqt-ship-it.github.io/outlook-pause-man/commands.js"
@@ -66,8 +71,9 @@
       "autoRunEvents": [
         {
           "requirements": {
+            "scopes": ["mail"],
             "capabilities": [
-              { "name": "Mailbox", "minVersion": "1.12" }
+              { "name": "Mailbox", "minVersion": "1.15" }
             ]
           },
           "events": [
